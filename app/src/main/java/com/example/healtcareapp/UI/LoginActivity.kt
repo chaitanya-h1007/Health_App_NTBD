@@ -1,21 +1,20 @@
-package com.example.healtcareapp
+package com.example.healtcareapp.UI
 
-import android.os.Bundle
-import androidx.activity.enableEdgeToEdge
-import androidx.appcompat.app.AppCompatActivity
 import android.content.Intent
-import android.widget.Toast
+import android.os.Bundle
 import android.widget.Button
 import android.widget.EditText
-import androidx.activity.result.contract.ActivityResultContracts
-import com.google.firebase.auth.FirebaseAuth
+import android.widget.Toast
+import androidx.activity.enableEdgeToEdge
+import androidx.appcompat.app.AppCompatActivity
+import com.example.healtcareapp.MainActivity
+import com.example.healtcareapp.R
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
-import com.google.android.gms.common.api.ApiException
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
-
 
 class LoginActivity : AppCompatActivity() {
 

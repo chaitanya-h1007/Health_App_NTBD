@@ -1,15 +1,14 @@
-package com.example.healtcareapp
+package com.example.healtcareapp.UI
 
-import android.os.Bundle
 import android.content.Intent
-import android.widget.Toast
+import android.os.Bundle
 import android.widget.Button
 import android.widget.EditText
+import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import com.example.healtcareapp.R
 import com.google.firebase.auth.FirebaseAuth
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
 
 class SignupActivity : AppCompatActivity() {
 
