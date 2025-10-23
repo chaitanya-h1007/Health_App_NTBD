@@ -1,3 +1,43 @@
 <resources>
-    <string name="app_name">HealtCareAPP</string>
+    <string name="app_name">Skin Firts</string>
+
+    <!-- Common -->
+    <string name="back">Back</string>
+    <string name="or">or</string>
+
+    <!-- Login Screen -->
+    <string name="log_in">Log In</string>
+    <string name="welcome">Welcome</string>
+    <string name="welcome_description">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</string>
+    <string name="email_or_mobile">Email or Mobile Number</string>
+    <string name="email">Email</string>
+    <string name="password">Password</string>
+    <string name="forgot_password">Forgot Password</string>
+    <string name="or_sign_up_with">or sign up with</string>
+    <string name="google_sign_in">Sign in with Google</string>
+    <string name="dont_have_account">Don\'t have an account?</string>
+    <string name="sign_up">Sign Up</string>
+
+    <!-- Sign Up Screen -->
+    <string name="hello">Hello!</string>
+    <string name="already_have_account">Already have an account?</string>
+    <string name="login">Login</string>
+
+    <!-- Dashboard Screen -->
+    <string name="specialties">Specialties</string>
+    <string name="find_your_doctor">Find Your Doctor</string>
+    <string name="search_hint">Search...</string>
+    <string name="upload_document">Upload\nDocument</string>
+    <string name="saved_documents">Saved\nDocuments</string>
+    <string name="scan_documents">Scan\nDocuments</string>
+    <string name="appointments">Appointments</string>
+
+    <!-- Bottom Navigation -->
+    <string name="home">Home</string>
+    <string name="search">Search</string>
+    <string name="profile">Profile</string>
+    <string name="calendar">Calendar</string>
+
+    <!-- Firebase -->
+    <string name="default_web_client_id">766804526041-noobhk9pl4flp0rm8orhpr418bphn1k8.apps.googleusercontent.com</string>
 </resources>
