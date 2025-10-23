@@ -7,7 +7,9 @@ import android.widget.EditText
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
-import com.example.healtcareapp.MainActivity
+import com.example.healtcareapp.UI.MainActivity
+import androidx.cardview.widget.CardView
+import com.example.healtcareapp.DashboardActivity
 import com.example.healtcareapp.R
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
@@ -41,7 +43,7 @@ class LoginActivity : AppCompatActivity() {
         val etEmail = findViewById<EditText>(R.id.etEmail)
         val etPassword = findViewById<EditText>(R.id.etPassword)
         val btnLogin = findViewById<Button>(R.id.btnLogin)
-        val btnGoogle = findViewById<Button>(R.id.btnGoogle)
+        val btnGoogle = findViewById<CardView>(R.id.cvGoogleSignIn)
 
 
         btnLogin.setOnClickListener {
@@ -53,7 +55,7 @@ class LoginActivity : AppCompatActivity() {
                     .addOnCompleteListener { task ->
                         if (task.isSuccessful) {
                             Toast.makeText(this, "Login Successful!", Toast.LENGTH_SHORT).show()
-                            startActivity(Intent(this, MainActivity::class.java))
+                            startActivity(Intent(this, DashboardActivity::class.java))
                             finish()
                         } else {
                             Toast.makeText(this, task.exception?.message, Toast.LENGTH_SHORT).show()
@@ -85,7 +87,7 @@ class LoginActivity : AppCompatActivity() {
                 .addOnCompleteListener(this) { task ->
                     if (task.isSuccessful) {
                         Toast.makeText(this, "Google Sign-In Success!", Toast.LENGTH_SHORT).show()
-                        startActivity(Intent(this, MainActivity::class.java))
+                        startActivity(Intent(this, DashboardActivity::class.java))
                         finish()
                     } else {
                         Toast.makeText(this, "Google Sign-In Failed!", Toast.LENGTH_SHORT).show()
