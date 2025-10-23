@@ -10,10 +10,11 @@
     <!-- Top Bar with Gradient Background -->
 
     <!-- Dashboard Grid -->
+
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/topBar"
-        android:layout_width="410dp"
-        android:layout_height="216dp"
+        android:layout_width="433dp"
+        android:layout_height="232dp"
         android:background="@drawable/gradient_primary"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
