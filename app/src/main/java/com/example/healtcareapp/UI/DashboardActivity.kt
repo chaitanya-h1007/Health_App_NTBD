@@ -1,8 +1,10 @@
-package com.example.healtcareapp
+package com.example.healtcareapp.UI
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.example.healtcareapp.databinding.ActivityDashboardBinding
 import com.google.firebase.auth.FirebaseAuth
@@ -38,7 +40,6 @@ class DashboardActivity : AppCompatActivity() {
         binding.cardUploadDocument.setOnClickListener {
             Toast.makeText(this, "Upload Document clicked", Toast.LENGTH_SHORT).show()
             // TODO: Navigate to Upload Document screen
-            // startActivity(Intent(this, UploadDocumentActivity::class.java))
         }
 
         binding.cardSavedDocuments.setOnClickListener {
@@ -88,9 +89,10 @@ class DashboardActivity : AppCompatActivity() {
         }
     }
 
+    @SuppressLint("MissingSuperCall")
     override fun onBackPressed() {
         // Show exit confirmation dialog
-        androidx.appcompat.app.AlertDialog.Builder(this)
+        AlertDialog.Builder(this)
             .setTitle("Exit App")
             .setMessage("Are you sure you want to exit?")
             .setPositiveButton("Yes") { _, _ ->

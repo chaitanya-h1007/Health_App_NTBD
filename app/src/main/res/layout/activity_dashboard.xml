@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/background"
-    tools:context=".DashboardActivity">
+    tools:context=".UI.DashboardActivity">
 
     <!-- Top Bar with Gradient Background -->
 
@@ -89,7 +89,7 @@
                     android:layout_height="20dp"
                     android:contentDescription="@string/search"
                     android:src="@drawable/ic_search"
-                    android:tint="@color/text_secondary" />
+                    app:tint="@color/text_secondary" />
 
                 <EditText
                     android:id="@+id/etSearch"
@@ -150,7 +150,7 @@
                     android:layout_height="48dp"
                     android:contentDescription="@string/upload_document"
                     android:src="@drawable/ic_upload_document"
-                    android:tint="@android:color/white" />
+                    app:tint="@android:color/white" />
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -192,7 +192,7 @@
                     android:layout_height="48dp"
                     android:contentDescription="@string/saved_documents"
                     android:src="@drawable/ic_saved_documents"
-                    android:tint="@android:color/white" />
+                    app:tint="@android:color/white" />
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -234,7 +234,7 @@
                     android:layout_height="48dp"
                     android:contentDescription="@string/scan_documents"
                     android:src="@drawable/ic_scan_documents"
-                    android:tint="@android:color/white" />
+                    app:tint="@android:color/white" />
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -276,7 +276,7 @@
                     android:layout_height="48dp"
                     android:contentDescription="@string/appointments"
                     android:src="@drawable/ic_appointments"
-                    android:tint="@android:color/white" />
+                    app:tint="@android:color/white" />
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -326,7 +326,7 @@
                     android:layout_height="24dp"
                     android:contentDescription="@string/home"
                     android:src="@drawable/ic_home"
-                    android:tint="@color/primary" />
+                    app:tint="@color/primary" />
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -353,7 +353,7 @@
                     android:layout_height="24dp"
                     android:contentDescription="@string/search"
                     android:src="@drawable/ic_search"
-                    android:tint="@color/icon_tint" />
+                    app:tint="@color/icon_tint" />
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -380,7 +380,7 @@
                     android:layout_height="24dp"
                     android:contentDescription="@string/profile"
                     android:src="@drawable/ic_profile"
-                    android:tint="@color/icon_tint" />
+                    app:tint="@color/icon_tint" />
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -407,7 +407,7 @@
                     android:layout_height="24dp"
                     android:contentDescription="@string/calendar"
                     android:src="@drawable/ic_calendar"
-                    android:tint="@color/icon_tint" />
+                    app:tint="@color/icon_tint" />
 
                 <TextView
                     android:layout_width="wrap_content"

@@ -9,7 +9,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import com.example.healtcareapp.UI.MainActivity
 import androidx.cardview.widget.CardView
-import com.example.healtcareapp.DashboardActivity
+import com.example.healtcareapp.UI.DashboardActivity
 import com.example.healtcareapp.R
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
