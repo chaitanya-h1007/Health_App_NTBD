@@ -5,6 +5,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.widget.Toast
+import androidx.activity.addCallback
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
@@ -26,6 +27,7 @@ class DashboardActivity : AppCompatActivity() {
 
         setupClickListeners()
         setupBottomNavigation()
+        setupOnBackPressed()
     }
 
     private fun setupClickListeners() {
@@ -98,18 +100,23 @@ class DashboardActivity : AppCompatActivity() {
         }
     }
 
-    /*@SuppressLint("MissingSuperCall")
-    override fun onBackPressed() {
-        // Show exit confirmation dialog
-        AlertDialog.Builder(this)
-            .setTitle("Exit App")
-            .setMessage("Are you sure you want to exit?")
-            .setPositiveButton("Yes") { _, _ ->
-                finishAffinity()
-            }
-            .setNegativeButton("No", null)
-            .show()
-    }*/
+
+
+    private fun setupOnBackPressed() {
+        onBackPressedDispatcher.addCallback(this) {
+            // Show exit confirmation dialog
+            AlertDialog.Builder(this@DashboardActivity)
+                .setTitle("Exit App")
+                .setMessage("Are you sure you want to exit?")
+                .setPositiveButton("Yes") { _, _ ->
+
+                    finishAffinity()
+                }
+                .setNegativeButton("No", null)
+                .show()
+        }
+    }
+
 
     private fun openCamera(){
         val intent = Intent(this, CameraActivity::class.java)
