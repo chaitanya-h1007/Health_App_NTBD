@@ -2,10 +2,13 @@ package com.example.healtcareapp.UI
 
 import android.annotation.SuppressLint
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import com.example.healtcareapp.databinding.ActivityDashboardBinding
 import com.google.firebase.auth.FirebaseAuth
 
@@ -51,7 +54,13 @@ class DashboardActivity : AppCompatActivity() {
         binding.cardScanDocuments.setOnClickListener {
             Toast.makeText(this, "Scan Documents clicked", Toast.LENGTH_SHORT).show()
             // TODO: Navigate to Scan Documents screen
-            // startActivity(Intent(this, ScanDocumentsActivity::class.java))
+
+            if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.CAMERA)
+                != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(this, arrayOf(android.Manifest.permission.CAMERA), 101)
+            } else {
+                openCamera()
+            }
         }
 
         binding.cardAppointments.setOnClickListener {
@@ -89,7 +98,7 @@ class DashboardActivity : AppCompatActivity() {
         }
     }
 
-    @SuppressLint("MissingSuperCall")
+    /*@SuppressLint("MissingSuperCall")
     override fun onBackPressed() {
         // Show exit confirmation dialog
         AlertDialog.Builder(this)
@@ -100,5 +109,10 @@ class DashboardActivity : AppCompatActivity() {
             }
             .setNegativeButton("No", null)
             .show()
+    }*/
+
+    private fun openCamera(){
+        val intent = Intent(this, CameraActivity::class.java)
+        startActivity(intent)
     }
 }
