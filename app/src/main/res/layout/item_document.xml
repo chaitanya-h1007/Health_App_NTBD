@@ -6,7 +6,6 @@
     android:background="@drawable/bg_card"
     android:padding="16dp"
     android:layout_marginBottom="12dp">
-
     <TextView
         android:id="@+id/tvDocName"
         android:layout_width="match_parent"
@@ -25,12 +24,21 @@
         android:textColor="#777"
         android:layout_marginTop="4dp"
         android:layout_marginBottom="8dp"/>
-
-    <Button
-        android:id="@+id/btnView"
+    <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="View PDF"
-        android:backgroundTint="#1E88E5"
-        android:textColor="#FFFFFF"/>
+        android:orientation="horizontal"
+        android:background="@drawable/bg_card">
+
+        <Button
+            android:id="@+id/btnPreview"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Preview / Analyze"
+            android:backgroundTint="#1E88E5"
+            android:textColor="#FFFFFF"
+            />
+
+    </LinearLayout>
+
 </LinearLayout>

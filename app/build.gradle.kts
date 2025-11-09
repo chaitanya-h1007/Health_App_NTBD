@@ -93,6 +93,8 @@ dependencies {
     //PDF Parsing
 
     implementation("com.tom-roush:pdfbox-android:2.0.27.0")
+
+
     // Google Places
     implementation("com.google.android.libraries.places:places:5.0.0")
 
@@ -103,5 +105,7 @@ dependencies {
     // Location
     implementation("com.google.android.gms:play-services-location:21.3.0")
 
+    //shimmer
+    implementation("com.facebook.shimmer:shimmer:0.5.0")
 
 }

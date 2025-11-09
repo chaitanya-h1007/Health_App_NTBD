@@ -1,7 +1,6 @@
 package com.example.healtcareapp.UI
 
 import android.Manifest
-import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Intent
 import android.content.IntentSender
@@ -12,24 +11,20 @@ import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
 import androidx.activity.addCallback
-import androidx.activity.result.ActivityResult
 import androidx.activity.result.IntentSenderRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import androidx.core.content.FileProvider
 import com.example.healtcareapp.databinding.ActivityDashboardBinding
 import com.google.firebase.auth.FirebaseAuth
-import androidx.activity.result.contract.ActivityResultContracts
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
 import com.google.mlkit.vision.documentscanner.GmsDocumentScannerOptions
 import com.google.mlkit.vision.documentscanner.GmsDocumentScanning
 import com.google.mlkit.vision.documentscanner.GmsDocumentScanningResult
-import java.io.File
 import java.util.UUID
-
 
 class DashboardActivity : AppCompatActivity() {
 
@@ -37,7 +32,11 @@ class DashboardActivity : AppCompatActivity() {
     private lateinit var auth: FirebaseAuth
     private var pdfUri: Uri? = null
 
-    //FOR PDF PICKER
+    // ✅ Always connect explicitly to your correct Firebase Storage bucket
+    private val firebaseStorage =
+        FirebaseStorage.getInstance("gs://health-care-e9c9d.firebasestorage.app")
+
+    // PDF Picker
     private val pdfPicker =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             if (result.resultCode == Activity.RESULT_OK && result.data != null) {
@@ -48,7 +47,8 @@ class DashboardActivity : AppCompatActivity() {
                 }
             }
         }
-    //permission check
+
+    // Permission Check
     private val requestPermissionLauncher =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
             if (isGranted) {
@@ -58,13 +58,11 @@ class DashboardActivity : AppCompatActivity() {
             }
         }
 
-    //FOR DOC SCANNER
+    // Document Scanner
     private val scannerLauncher =
         registerForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) { result ->
             if (result.resultCode == RESULT_OK) {
                 val scanningResult = GmsDocumentScanningResult.fromActivityResultIntent(result.data)
-
-                // ✅ If a PDF was generated, upload it to Firebase
                 scanningResult?.pdf?.let { pdf ->
                     val pdfUri = pdf.uri
                     Toast.makeText(this, "Uploading scanned document...", Toast.LENGTH_SHORT).show()
@@ -74,10 +72,6 @@ class DashboardActivity : AppCompatActivity() {
                 Toast.makeText(this, "Scanning canceled!", Toast.LENGTH_SHORT).show()
             }
         }
-
-
-
-
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -92,37 +86,27 @@ class DashboardActivity : AppCompatActivity() {
     }
 
     private fun setupClickListeners() {
-        // Back button
         binding.btnBack.setOnClickListener {
             onBackPressedDispatcher.onBackPressed()
         }
 
-        // Search functionality
         binding.etSearch.setOnClickListener {
             Toast.makeText(this, "Search feature coming soon", Toast.LENGTH_SHORT).show()
         }
 
-        // Dashboard cards
         binding.cardUploadDocument.setOnClickListener {
-            Toast.makeText(this, "Upload Document clicked", Toast.LENGTH_SHORT).show()
             checkPermissionAndPickPdf()
-
-
         }
 
         binding.cardSavedDocuments.setOnClickListener {
-            Toast.makeText(this, "Saved Documents clicked", Toast.LENGTH_SHORT).show()
-            // TODO: Navigate to Saved Documents screen
             startActivity(Intent(this, SavedDocumentsActivity::class.java))
         }
 
         binding.cardScanDocuments.setOnClickListener {
-            Toast.makeText(this, "Scan Documents clicked", Toast.LENGTH_SHORT).show()
-            // TODO: Navigate to Scan Documents screen
-
-            if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.CAMERA)
-                != PackageManager.PERMISSION_GRANTED) {
-                ActivityCompat.requestPermissions(this, arrayOf(android.Manifest.permission.CAMERA), 101)
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
+                != PackageManager.PERMISSION_GRANTED
+            ) {
+                ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.CAMERA), 101)
             } else {
                 openDocScanner()
             }
@@ -130,83 +114,66 @@ class DashboardActivity : AppCompatActivity() {
 
         binding.cardAppointments.setOnClickListener {
             Toast.makeText(this, "Appointments clicked", Toast.LENGTH_SHORT).show()
-            // TODO: Navigate to Appointments screen
-            // startActivity(Intent(this, AppointmentsActivity::class.java))
         }
     }
 
     private fun setupBottomNavigation() {
-        // Home tab (current screen)
         binding.tabHome.setOnClickListener {
-            // Already on home screen
             Toast.makeText(this, "Home", Toast.LENGTH_SHORT).show()
         }
 
-        // Search tab
         binding.tabSearch.setOnClickListener {
             Toast.makeText(this, "Search feature coming soon", Toast.LENGTH_SHORT).show()
-            // TODO: Navigate to Search screen
         }
 
-        // Profile tab
         binding.tabProfile.setOnClickListener {
             Toast.makeText(this, "Profile feature coming soon", Toast.LENGTH_SHORT).show()
-            // TODO: Navigate to Profile screen
-            // startActivity(Intent(this, ProfileActivity::class.java))
         }
 
-        // Calendar tab
         binding.tabCalendar.setOnClickListener {
             Toast.makeText(this, "Calendar feature coming soon", Toast.LENGTH_SHORT).show()
-            // TODO: Navigate to Calendar screen
-            // startActivity(Intent(this, CalendarActivity::class.java))
         }
     }
 
-
-
     private fun setupOnBackPressed() {
         onBackPressedDispatcher.addCallback(this) {
-            // Show exit confirmation dialog
             AlertDialog.Builder(this@DashboardActivity)
                 .setTitle("Exit App")
                 .setMessage("Are you sure you want to exit?")
-                .setPositiveButton("Yes") { _, _ ->
-
-                    finishAffinity()
-                }
+                .setPositiveButton("Yes") { _, _ -> finishAffinity() }
                 .setNegativeButton("No", null)
                 .show()
         }
     }
 
-
-    fun openDocScanner(){
-        try{
+    fun openDocScanner() {
+        try {
             val options = GmsDocumentScannerOptions.Builder()
-                .setScannerMode(GmsDocumentScannerOptions.SCANNER_MODE_BASE)
-                .setResultFormats(GmsDocumentScannerOptions.RESULT_FORMAT_PDF,GmsDocumentScannerOptions.RESULT_FORMAT_JPEG)
-                .setGalleryImportAllowed(false)
                 .setScannerMode(GmsDocumentScannerOptions.SCANNER_MODE_FULL)
+                .setResultFormats(
+                    GmsDocumentScannerOptions.RESULT_FORMAT_PDF,
+                    GmsDocumentScannerOptions.RESULT_FORMAT_JPEG
+                )
+                .setGalleryImportAllowed(false)
                 .setPageLimit(10)
-            GmsDocumentScanning.getClient(options.build())
+                .build()
+
+            GmsDocumentScanning.getClient(options)
                 .getStartScanIntent(this)
                 .addOnSuccessListener { intentSender: IntentSender ->
                     scannerLauncher.launch(IntentSenderRequest.Builder(intentSender).build())
                 }
-                .addOnFailureListener() { e: Exception ->
-                    e.message?.let { Log.e("error", it) }
+                .addOnFailureListener { e ->
+                    Log.e("ScannerError", e.message ?: "Unknown error")
                 }
-        }catch (e : Exception ){
-            e.stackTrace
-
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
-
     }
 
     private fun checkPermissionAndPickPdf() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            openFilePicker() // Android 13+ auto-grants access
+            openFilePicker()
         } else {
             if (ContextCompat.checkSelfPermission(
                     this,
@@ -226,25 +193,28 @@ class DashboardActivity : AppCompatActivity() {
         pdfPicker.launch(intent)
     }
 
-
+    // ✅ FIXED: Use your correct Firebase Storage bucket directly
     private fun uploadPdfToFirebase(uri: Uri) {
-        val storageRef = FirebaseStorage.getInstance().reference
+        val storageRef = firebaseStorage.reference
         val fileName = "document_${UUID.randomUUID()}.pdf"
         val fileRef = storageRef.child("documents/$fileName")
 
         Toast.makeText(this, "Uploading...", Toast.LENGTH_SHORT).show()
 
-        val uploadTask = fileRef.putFile(uri)
-        uploadTask.addOnSuccessListener {
-            fileRef.downloadUrl.addOnSuccessListener { downloadUrl ->
-                saveToFirestore(fileName, downloadUrl.toString())
+        fileRef.putFile(uri)
+            .addOnSuccessListener {
+                fileRef.downloadUrl.addOnSuccessListener { uri ->
+                    val downloadUrl = uri.toString()
+                    Log.d("UPLOAD_SUCCESS", "File uploaded: $downloadUrl")
+                    saveToFirestore(fileName, downloadUrl)
+                }
             }
-        }.addOnFailureListener {
-            Toast.makeText(this, "Upload failed: ${it.message}", Toast.LENGTH_SHORT).show()
-        }
+            .addOnFailureListener { e ->
+                Log.e("UPLOAD_ERROR", "Upload failed: ${e.message}")
+                Toast.makeText(this, "Upload failed: ${e.message}", Toast.LENGTH_SHORT).show()
+            }
     }
 
-    // ✅ Save PDF info in Firestore
     private fun saveToFirestore(name: String, url: String) {
         val db = FirebaseFirestore.getInstance()
         val documentData = hashMapOf(
@@ -261,5 +231,4 @@ class DashboardActivity : AppCompatActivity() {
                 Toast.makeText(this, "Error: ${it.message}", Toast.LENGTH_SHORT).show()
             }
     }
-
 }

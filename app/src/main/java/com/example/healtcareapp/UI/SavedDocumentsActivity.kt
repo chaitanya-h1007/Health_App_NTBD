@@ -66,7 +66,7 @@ class DocumentsAdapter(private val items: List<DocumentModel>) :
         RecyclerView.ViewHolder(inflater.inflate(R.layout.item_document, parent, false)) {
         val tvName: TextView = itemView.findViewById(R.id.tvDocName)
         val tvDate: TextView = itemView.findViewById(R.id.tvDocDate)
-        val btnView: Button = itemView.findViewById(R.id.btnView)
+        val btnView: Button = itemView.findViewById(R.id.btnPreview)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): DocumentViewHolder {
@@ -86,6 +86,16 @@ class DocumentsAdapter(private val items: List<DocumentModel>) :
             intent.setDataAndType(Uri.parse(document.url), "application/pdf")
             intent.flags = Intent.FLAG_ACTIVITY_NO_HISTORY
             holder.itemView.context.startActivity(intent)
+        }
+
+        // ✅ Preview/Analyze Button
+        val btnPreview = holder.itemView.findViewById<Button>(R.id.btnPreview)
+        btnPreview.setOnClickListener {
+            val context = holder.itemView.context
+            val intent = Intent(context, PreviewActivity::class.java)
+            intent.putExtra("pdfUrl", document.url)
+            intent.putExtra("pdfName", document.name)
+            context.startActivity(intent)
         }
     }
 
