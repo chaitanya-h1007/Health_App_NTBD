@@ -24,7 +24,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Analyze Report"
-        android:backgroundTint="#6200EE"
+        android:backgroundTint="@color/primary"
         android:textColor="#FFFFFF"
         android:textAllCaps="false"
         android:layout_marginTop="12dp"

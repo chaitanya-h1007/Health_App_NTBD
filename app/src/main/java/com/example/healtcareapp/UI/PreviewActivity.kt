@@ -1,22 +1,29 @@
 package com.example.healtcareapp.UI
 
+import android.app.AlertDialog
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import android.widget.Button
+import android.widget.ProgressBar
+import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.example.healtcareapp.R
 import com.example.healtcareapp.helper.LabReportParser
 import com.example.healtcareapp.helper.OcrTextExtractor
-import com.example.healtcareapp.helper.PdfTextExtractor
 import com.example.healtcareapp.helper.ReportAnalyzer
-import com.example.healtcareapp.model.LabReport
 import com.google.firebase.storage.FirebaseStorage
-import com.tom_roush.pdfbox.android.PDFBoxResourceLoader
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.TimeoutCancellationException
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeout
 import java.io.File
 
 class PreviewActivity : AppCompatActivity() {
@@ -26,7 +33,7 @@ class PreviewActivity : AppCompatActivity() {
     private var pdfName: String? = null
     private var localPdfUri: Uri? = null
 
-    // ✅ Use your correct Firebase bucket explicitly
+    // ✅ Your Firebase bucket (fixed to match console)
     private val firebaseStorage =
         FirebaseStorage.getInstance("gs://health-care-e9c9d.firebasestorage.app")
 
@@ -35,6 +42,8 @@ class PreviewActivity : AppCompatActivity() {
         setContentView(R.layout.activity_preview)
 
         btnAnalyze = findViewById(R.id.btnAnalyze)
+        btnAnalyze.isEnabled = false // disabled until download completes
+
         pdfUrl = intent.getStringExtra("pdfUrl")
         pdfName = intent.getStringExtra("pdfName")
 
@@ -42,78 +51,127 @@ class PreviewActivity : AppCompatActivity() {
             Toast.makeText(this, "No PDF URL found!", Toast.LENGTH_SHORT).show()
             return
         }
-
-        // ✅ Download PDF before analysis
         downloadPdfForAnalysis(pdfUrl!!)
+    }
 
-       /* btnAnalyze.setOnClickListener {
-            if (localPdfUri == null) {
-                Toast.makeText(this, "PDF not downloaded yet!", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
-            }
-            PDFBoxResourceLoader.init(applicationContext)
-            // Extract, parse, and analyze the lab report
-            val text = PdfTextExtractor.extractText(this, localPdfUri!!)
+    /**
+     * ✅ Custom reusable progress dialog
+     */
+    private fun showProgressDialog(message: String): AlertDialog {
+        val dialogView = layoutInflater.inflate(R.layout.dialog_progress, null)
+        val text = dialogView.findViewById<TextView>(R.id.tvProgressText)
+        val progress = dialogView.findViewById<ProgressBar>(R.id.progressBar)
+        text.text = message
+        progress.isIndeterminate = true
 
-            Log.d("ExtractedText", text) // 👈 Add this
+        val dialog = AlertDialog.Builder(this)
+            .setView(dialogView)
+            .setCancelable(false)
+            .create()
 
+        dialog.show()
+        return dialog
+    }
 
-            val report = LabReportParser.parse(text)
-            Log.d("ParsedReport", report.toString())
-            val result = ReportAnalyzer.analyze(report)
+    /**
+     * ✅ Download PDF for analysis
+     */
+    private fun downloadPdfForAnalysis(url: String) {
+        try {
+            val storageRef = firebaseStorage.getReferenceFromUrl(url)
+            val localFile = File.createTempFile("tempReport", ".pdf")
 
-            // ✅ Show result in next screen
-            val intent = Intent(this, HealthResultActivity::class.java)
-            intent.putExtra("score", result.score)
-            intent.putExtra("message", "${result.status}\n\n${result.summary}")
-            startActivity(intent)
-        }*/
+            val downloadDialog = showProgressDialog("Downloading your report...")
 
+            storageRef.getFile(localFile)
+                .addOnSuccessListener {
+                    downloadDialog.dismiss()
+                    localPdfUri = Uri.fromFile(localFile)
+
+                    // ✅ Show ready popup
+                    AlertDialog.Builder(this)
+                        .setTitle("Report Ready ✅")
+                        .setMessage("Your report has been downloaded successfully. You can now analyze it.")
+                        .setPositiveButton("OK") { dialog, _ ->
+                            dialog.dismiss()
+                            btnAnalyze.isEnabled = true
+                        }
+                        .show()
+                }
+                .addOnFailureListener {
+                    downloadDialog.dismiss()
+                    Toast.makeText(this, "❌ Failed to download: ${it.message}", Toast.LENGTH_LONG).show()
+                }
+
+        } catch (e: Exception) {
+            Toast.makeText(this, "Error: ${e.message}", Toast.LENGTH_SHORT).show()
+        }
+
+        /**
+         * Step 2: Analyze Button Flow
+         */
         btnAnalyze.setOnClickListener {
             if (localPdfUri == null) {
                 Toast.makeText(this, "PDF not downloaded yet!", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
 
-            // Use coroutine to handle ML Kit OCR
+            val analyzingDialog = showProgressDialog("Analyzing your report...")
+
             lifecycleScope.launch {
-                Toast.makeText(this@PreviewActivity, "Analyzing report, please wait...", Toast.LENGTH_SHORT).show()
+                try {
+                    withTimeout(20000) { // ⏱️ 20 seconds max
+                        val text = withContext(Dispatchers.IO) {
+                            OcrTextExtractor.extractTextFromPdf(this@PreviewActivity, localPdfUri!!)
+                        }
 
-                val text = OcrTextExtractor.extractTextFromPdf(this@PreviewActivity, localPdfUri!!)
-                Log.d("ExtractedText", text)
+                        Log.d("ExtractedText", text.take(200)) // limit logs
+                        val report = LabReportParser.parse(text)
+                        Log.d("ParsedReport", report.toString())
 
-                val report = LabReportParser.parse(text)
-                Log.d("ParsedReport", report.toString())
+                        val result = withContext(Dispatchers.Default) {
+                            ReportAnalyzer.analyze(report)
+                        }
 
-                val result = ReportAnalyzer.analyze(report)
+                        delay(1500) // small pause for smooth transition
+                        analyzingDialog.dismiss()
 
-                val intent = Intent(this@PreviewActivity, HealthResultActivity::class.java)
-                intent.putExtra("score", result.score)
-                intent.putExtra("message", "${result.status}\n\n${result.summary}")
-                startActivity(intent)
+                        showSuccessPopup(result.score, result.status, result.summary)
+                    }
+                } catch (e: TimeoutCancellationException) {
+                    analyzingDialog.dismiss()
+                    Toast.makeText(
+                        this@PreviewActivity,
+                        "⏳ OCR analysis took too long. Please retry.",
+                        Toast.LENGTH_LONG
+                    ).show()
+                } catch (e: Exception) {
+                    analyzingDialog.dismiss()
+                    Toast.makeText(this@PreviewActivity, "Error: ${e.message}", Toast.LENGTH_SHORT).show()
+                } finally {
+                    if (analyzingDialog.isShowing) analyzingDialog.dismiss()
+                }
             }
         }
 
     }
 
-    private fun downloadPdfForAnalysis(url: String) {
-        try {
-            // ✅ No need to replace the URL now — your bucket is correct
-            val storageRef = firebaseStorage.getReferenceFromUrl(url)
-            val localFile = File.createTempFile("tempReport", ".pdf")
-
-            Toast.makeText(this, "Downloading report for analysis...", Toast.LENGTH_SHORT).show()
-
-            storageRef.getFile(localFile)
-                .addOnSuccessListener {
-                    localPdfUri = Uri.fromFile(localFile)
-                    Toast.makeText(this, "Report ready for analysis ✅", Toast.LENGTH_SHORT).show()
-                }
-                .addOnFailureListener {
-                    Toast.makeText(this, "Failed to download: ${it.message}", Toast.LENGTH_SHORT).show()
-                }
-        } catch (e: Exception) {
-            Toast.makeText(this, "Error: ${e.message}", Toast.LENGTH_SHORT).show()
-        }
+    /**
+     * ✅ Show popup after analysis
+     */
+    private fun showSuccessPopup(score: Int, status: String, summary: String) {
+        AlertDialog.Builder(this)
+            .setTitle("Analysis Complete ✅")
+            .setMessage("Your health report has been analyzed successfully.\n\nTap Continue to view your result.")
+            .setCancelable(false)
+            .setPositiveButton("Continue") { dialog, _ ->
+                dialog.dismiss()
+                val intent = Intent(this, HealthResultActivity::class.java)
+                intent.putExtra("score", score)
+                intent.putExtra("message", "$status\n\n$summary")
+                startActivity(intent)
+                overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
+            }
+            .show()
     }
 }

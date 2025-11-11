@@ -20,15 +20,16 @@ object ReportAnalyzer {
         // 🩸 Blood parameters
         adjust(report.hemoglobin != null && report.hemoglobin!! < 13.0, "Low Hemoglobin (Anemia risk)")
         adjust(report.hemoglobin != null && report.hemoglobin!! > 17.0, "High Hemoglobin")
+        adjust(report.hematocrit != null && report.hematocrit!! < 45.0, "Low Hematocrit (Low liver function")
         adjust(report.rbc != null && report.rbc!! < 4.5, "Low RBC count")
         adjust(report.wbc != null && report.wbc!! > 11, "Possible infection (High WBC)")
         adjust(report.platelets != null && report.platelets!! < 150, "Low Platelet count")
 
-        // 🍬 Diabetes markers
+
         adjust(report.fastingGlucose != null && report.fastingGlucose!! > 126, "High Fasting Glucose (Possible Diabetes)")
         adjust(report.hba1c != null && report.hba1c!! > 6.5, "Elevated HbA1c (Diabetes indicator)")
 
-        // 💓 Lipid Profile
+
         adjust(report.cholesterolTotal != null && report.cholesterolTotal!! > 200, "High Cholesterol")
         adjust(report.triglycerides != null && report.triglycerides!! > 150, "High Triglycerides")
         adjust(report.ldl != null && report.ldl!! > 130, "High LDL Cholesterol")

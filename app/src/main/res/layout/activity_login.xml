@@ -58,7 +58,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:text="@string/welcome_description"
+            android:text=""
             android:textColor="@color/text_secondary"
             android:textSize="14sp"
             app:layout_constraintEnd_toEndOf="parent"
@@ -145,6 +145,7 @@
             android:textStyle="bold"
             app:cornerRadius="28dp"
             app:layout_constraintEnd_toEndOf="parent"
+            android:backgroundTint="@color/primary"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/tvForgotPassword" />
 

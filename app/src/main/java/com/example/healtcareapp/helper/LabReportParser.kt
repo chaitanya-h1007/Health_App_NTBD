@@ -6,7 +6,6 @@ import com.example.healtcareapp.model.LabReport
 object LabReportParser {
 
     fun parse(rawText: String): LabReport {
-        // Step 1️⃣: Clean OCR text
         var text = rawText.replace("\n", " ")
             .replace(Regex("\\s+"), " ")
             .replace(Regex("(?i)method.*?(?=\\b[A-Z])"), "")

@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="24dp"
+    android:background="@drawable/bg_dialog_rounded">
+
+    <!-- Title -->
+    <TextView
+        android:id="@+id/tvDialogTitle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Enter report name"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:textColor="@color/black"
+        android:paddingBottom="12dp"
+        android:gravity="center" />
+
+    <!-- EditText field -->
+    <EditText
+        android:id="@+id/etReportName"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="e.g. Blood_Test_Report"
+        android:background="@drawable/bg_edittext_rounded"
+        android:paddingHorizontal="16dp"
+        android:paddingVertical="12dp"
+        android:textColor="@color/black"
+        android:textCursorDrawable="@drawable/custom_cursor"
+        android:textSize="16sp"
+        android:importantForAutofill="no"
+        android:inputType="textCapWords"
+        android:imeOptions="actionDone" />
+
+    <!-- Small tip text -->
+    <TextView
+        android:id="@+id/tvHint"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Tip: Use short, meaningful names"
+        android:textColor="#808080"
+        android:textSize="13sp"
+        android:paddingTop="8dp"
+        android:gravity="center" />
+</LinearLayout>

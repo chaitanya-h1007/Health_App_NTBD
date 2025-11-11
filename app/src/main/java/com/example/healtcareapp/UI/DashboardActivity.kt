@@ -9,6 +9,8 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
+import android.view.LayoutInflater
+import android.widget.EditText
 import android.widget.Toast
 import androidx.activity.addCallback
 import androidx.activity.result.IntentSenderRequest
@@ -17,6 +19,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import com.example.healtcareapp.R
 import com.example.healtcareapp.databinding.ActivityDashboardBinding
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -24,7 +27,6 @@ import com.google.firebase.storage.FirebaseStorage
 import com.google.mlkit.vision.documentscanner.GmsDocumentScannerOptions
 import com.google.mlkit.vision.documentscanner.GmsDocumentScanning
 import com.google.mlkit.vision.documentscanner.GmsDocumentScanningResult
-import java.util.UUID
 
 class DashboardActivity : AppCompatActivity() {
 
@@ -32,30 +34,26 @@ class DashboardActivity : AppCompatActivity() {
     private lateinit var auth: FirebaseAuth
     private var pdfUri: Uri? = null
 
-    // ✅ Always connect explicitly to your correct Firebase Storage bucket
+    // ✅ Keep your existing Firebase URL
     private val firebaseStorage =
         FirebaseStorage.getInstance("gs://health-care-e9c9d.firebasestorage.app")
+
+    private val firestore = FirebaseFirestore.getInstance()
 
     // PDF Picker
     private val pdfPicker =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             if (result.resultCode == Activity.RESULT_OK && result.data != null) {
                 pdfUri = result.data!!.data
-                pdfUri?.let { uri ->
-                    Toast.makeText(this, "PDF Selected: ${uri.lastPathSegment}", Toast.LENGTH_SHORT).show()
-                    uploadPdfToFirebase(uri)
-                }
+                pdfUri?.let { showRenameDialog(it) }
             }
         }
 
     // Permission Check
     private val requestPermissionLauncher =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
-            if (isGranted) {
-                openFilePicker()
-            } else {
-                Toast.makeText(this, "Permission denied!", Toast.LENGTH_SHORT).show()
-            }
+            if (isGranted) openFilePicker()
+            else Toast.makeText(this, "Permission denied!", Toast.LENGTH_SHORT).show()
         }
 
     // Document Scanner
@@ -64,9 +62,7 @@ class DashboardActivity : AppCompatActivity() {
             if (result.resultCode == RESULT_OK) {
                 val scanningResult = GmsDocumentScanningResult.fromActivityResultIntent(result.data)
                 scanningResult?.pdf?.let { pdf ->
-                    val pdfUri = pdf.uri
-                    Toast.makeText(this, "Uploading scanned document...", Toast.LENGTH_SHORT).show()
-                    uploadPdfToFirebase(pdfUri)
+                    showRenameDialog(pdf.uri)
                 }
             } else {
                 Toast.makeText(this, "Scanning canceled!", Toast.LENGTH_SHORT).show()
@@ -94,9 +90,7 @@ class DashboardActivity : AppCompatActivity() {
             Toast.makeText(this, "Search feature coming soon", Toast.LENGTH_SHORT).show()
         }
 
-        binding.cardUploadDocument.setOnClickListener {
-            checkPermissionAndPickPdf()
-        }
+        binding.cardUploadDocument.setOnClickListener { checkPermissionAndPickPdf() }
 
         binding.cardSavedDocuments.setOnClickListener {
             startActivity(Intent(this, SavedDocumentsActivity::class.java))
@@ -118,21 +112,10 @@ class DashboardActivity : AppCompatActivity() {
     }
 
     private fun setupBottomNavigation() {
-        binding.tabHome.setOnClickListener {
-            Toast.makeText(this, "Home", Toast.LENGTH_SHORT).show()
-        }
-
-        binding.tabSearch.setOnClickListener {
-            Toast.makeText(this, "Search feature coming soon", Toast.LENGTH_SHORT).show()
-        }
-
-        binding.tabProfile.setOnClickListener {
-            Toast.makeText(this, "Profile feature coming soon", Toast.LENGTH_SHORT).show()
-        }
-
-        binding.tabCalendar.setOnClickListener {
-            Toast.makeText(this, "Calendar feature coming soon", Toast.LENGTH_SHORT).show()
-        }
+        binding.tabHome.setOnClickListener { Toast.makeText(this, "Home", Toast.LENGTH_SHORT).show() }
+        binding.tabSearch.setOnClickListener { Toast.makeText(this, "Search feature coming soon", Toast.LENGTH_SHORT).show() }
+        binding.tabProfile.setOnClickListener { Toast.makeText(this, "Profile feature coming soon", Toast.LENGTH_SHORT).show() }
+        binding.tabCalendar.setOnClickListener { Toast.makeText(this, "Calendar feature coming soon", Toast.LENGTH_SHORT).show() }
     }
 
     private fun setupOnBackPressed() {
@@ -146,7 +129,7 @@ class DashboardActivity : AppCompatActivity() {
         }
     }
 
-    fun openDocScanner() {
+    private fun openDocScanner() {
         try {
             val options = GmsDocumentScannerOptions.Builder()
                 .setScannerMode(GmsDocumentScannerOptions.SCANNER_MODE_FULL)
@@ -175,10 +158,8 @@ class DashboardActivity : AppCompatActivity() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             openFilePicker()
         } else {
-            if (ContextCompat.checkSelfPermission(
-                    this,
-                    Manifest.permission.READ_EXTERNAL_STORAGE
-                ) == PackageManager.PERMISSION_GRANTED
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE)
+                == PackageManager.PERMISSION_GRANTED
             ) {
                 openFilePicker()
             } else {
@@ -193,42 +174,71 @@ class DashboardActivity : AppCompatActivity() {
         pdfPicker.launch(intent)
     }
 
-    // ✅ FIXED: Use your correct Firebase Storage bucket directly
-    private fun uploadPdfToFirebase(uri: Uri) {
-        val storageRef = firebaseStorage.reference
-        val fileName = "document_${UUID.randomUUID()}.pdf"
-        val fileRef = storageRef.child("documents/$fileName")
+    /**
+     * 📝 Step 1 — Show rename dialog before upload
+     */
+    private fun showRenameDialog(uri: Uri) {
+        val view = LayoutInflater.from(this).inflate(R.layout.dialog_rename, null)
+        val etName = view.findViewById<EditText>(R.id.etReportName)
+        etName.setText("HealthReport_${System.currentTimeMillis()}")
 
-        Toast.makeText(this, "Uploading...", Toast.LENGTH_SHORT).show()
+        AlertDialog.Builder(this)
+            .setTitle("Rename Report")
+            .setMessage("Enter a custom name for your report")
+            .setView(view)
+            .setPositiveButton("Upload") { dialog, _ ->
+                val customName = etName.text.toString().trim()
+                if (customName.isNotEmpty()) {
+                    uploadPdfToFirebase(uri, customName)
+                } else {
+                    Toast.makeText(this, "Please enter a name", Toast.LENGTH_SHORT).show()
+                }
+                dialog.dismiss()
+            }
+            .setNegativeButton("Cancel") { dialog, _ -> dialog.dismiss() }
+            .show()
+    }
+
+    /**
+     * ☁️ Step 2 — Upload renamed PDF to Firebase
+     */
+    private fun uploadPdfToFirebase(uri: Uri, fileName: String) {
+        val fileRef = firebaseStorage.reference.child("documents/$fileName.pdf")
+        Toast.makeText(this, "Uploading $fileName...", Toast.LENGTH_SHORT).show()
 
         fileRef.putFile(uri)
             .addOnSuccessListener {
-                fileRef.downloadUrl.addOnSuccessListener { uri ->
-                    val downloadUrl = uri.toString()
-                    Log.d("UPLOAD_SUCCESS", "File uploaded: $downloadUrl")
-                    saveToFirestore(fileName, downloadUrl)
+                fileRef.downloadUrl.addOnSuccessListener { downloadUrl ->
+                    val url = downloadUrl.toString()
+                    saveToFirestore(fileName, url)
                 }
             }
             .addOnFailureListener { e ->
-                Log.e("UPLOAD_ERROR", "Upload failed: ${e.message}")
                 Toast.makeText(this, "Upload failed: ${e.message}", Toast.LENGTH_SHORT).show()
             }
     }
 
+    /**
+     * 💾 Step 3 — Save to Firestore and redirect to analyze screen
+     */
     private fun saveToFirestore(name: String, url: String) {
-        val db = FirebaseFirestore.getInstance()
-        val documentData = hashMapOf(
+        val data = hashMapOf(
             "name" to name,
             "url" to url,
             "timestamp" to System.currentTimeMillis()
         )
 
-        db.collection("documents").add(documentData)
+        firestore.collection("documents").add(data)
             .addOnSuccessListener {
-                Toast.makeText(this, "PDF uploaded successfully ✅", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Uploaded successfully ✅", Toast.LENGTH_SHORT).show()
+                val intent = Intent(this, PreviewActivity::class.java)
+                intent.putExtra("pdfUrl", url)
+                intent.putExtra("pdfName", name)
+                startActivity(intent)
+                overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
             }
             .addOnFailureListener {
-                Toast.makeText(this, "Error: ${it.message}", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Error saving data: ${it.message}", Toast.LENGTH_SHORT).show()
             }
     }
 }

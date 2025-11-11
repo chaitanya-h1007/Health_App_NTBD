@@ -40,10 +40,10 @@ class HealthResultActivity : AppCompatActivity() {
         }
 
         btnFindDoctors.setOnClickListener {
-            val uri = Uri.parse("geo:0,0?q=doctors+near+me")
-            val mapIntent = Intent(Intent.ACTION_VIEW, uri)
-            mapIntent.setPackage("com.google.android.apps.maps")
-            startActivity(mapIntent)
+            val intent = Intent(this, FindDoctorsActivity::class.java)
+            startActivity(intent)
+            overridePendingTransition(/* enterAnim = */ android.R.anim.fade_in, /* exitAnim = */
+                android.R.anim.fade_out)
         }
 
     }

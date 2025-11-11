@@ -12,6 +12,11 @@ android {
     namespace = "com.example.healtcareapp"
     compileSdk = 36
 
+    buildFeatures {
+        viewBinding = true
+        buildConfig = true
+    }
+
     defaultConfig {
         applicationId = "com.example.healtcareapp"
         minSdk = 24
@@ -25,15 +30,14 @@ android {
             load(FileInputStream(rootProject.file("local.properties")))
         }
         val googleApiKey = properties.getProperty("GOOGLE_API_KEY")
+
         manifestPlaceholders["GOOGLE_API_KEY"] = googleApiKey
 
 
 
     }
-    buildFeatures {
-        viewBinding = true
-    }
-    
+
+
 
 
     buildTypes {
@@ -44,7 +48,7 @@ android {
                 "proguard-rules.pro"
             )
         }
-        
+
     }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
@@ -77,7 +81,7 @@ dependencies {
     implementation("com.google.firebase:firebase-firestore")
     implementation("com.google.firebase:firebase-storage")
 
-
+    implementation("com.squareup.okhttp3:okhttp:4.12.0")
 
 
     /*ML KIT*/
