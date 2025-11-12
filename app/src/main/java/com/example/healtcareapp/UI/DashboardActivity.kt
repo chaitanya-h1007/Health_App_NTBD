@@ -34,7 +34,7 @@ class DashboardActivity : AppCompatActivity() {
     private lateinit var auth: FirebaseAuth
     private var pdfUri: Uri? = null
 
-    // ✅ Keep your existing Firebase URL
+
     private val firebaseStorage =
         FirebaseStorage.getInstance("gs://health-care-e9c9d.firebasestorage.app")
 
@@ -174,9 +174,7 @@ class DashboardActivity : AppCompatActivity() {
         pdfPicker.launch(intent)
     }
 
-    /**
-     * 📝 Step 1 — Show rename dialog before upload
-     */
+
     private fun showRenameDialog(uri: Uri) {
         val view = LayoutInflater.from(this).inflate(R.layout.dialog_rename, null)
         val etName = view.findViewById<EditText>(R.id.etReportName)
@@ -199,9 +197,7 @@ class DashboardActivity : AppCompatActivity() {
             .show()
     }
 
-    /**
-     * ☁️ Step 2 — Upload renamed PDF to Firebase
-     */
+
     private fun uploadPdfToFirebase(uri: Uri, fileName: String) {
         val fileRef = firebaseStorage.reference.child("documents/$fileName.pdf")
         Toast.makeText(this, "Uploading $fileName...", Toast.LENGTH_SHORT).show()
@@ -218,9 +214,7 @@ class DashboardActivity : AppCompatActivity() {
             }
     }
 
-    /**
-     * 💾 Step 3 — Save to Firestore and redirect to analyze screen
-     */
+
     private fun saveToFirestore(name: String, url: String) {
         val data = hashMapOf(
             "name" to name,

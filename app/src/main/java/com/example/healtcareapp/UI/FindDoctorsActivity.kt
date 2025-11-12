@@ -67,7 +67,7 @@ class FindDoctorsActivity : AppCompatActivity() {
 
         Log.d("FindDoctors", "Google API Key Loaded: $apiKey")
 
-        // 🔒 Check for key before proceeding
+
         if (apiKey.isEmpty()) {
             Toast.makeText(this, "Google API key not found. Please check your manifest.", Toast.LENGTH_LONG).show()
             return

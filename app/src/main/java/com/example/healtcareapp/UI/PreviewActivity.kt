@@ -120,7 +120,7 @@ class PreviewActivity : AppCompatActivity() {
 
             lifecycleScope.launch {
                 try {
-                    withTimeout(20000) { // ⏱️ 20 seconds max
+                    withTimeout(20000) {
                         val text = withContext(Dispatchers.IO) {
                             OcrTextExtractor.extractTextFromPdf(this@PreviewActivity, localPdfUri!!)
                         }

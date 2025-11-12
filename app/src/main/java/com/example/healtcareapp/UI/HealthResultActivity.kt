@@ -33,7 +33,7 @@ class HealthResultActivity : AppCompatActivity() {
         tvMessage.text = message
 
         // Show button only if score is low
-        if (score >= 8) {
+        if (score >= 9) {
             btnFindDoctors.visibility = View.GONE
         } else {
             btnFindDoctors.visibility = View.VISIBLE
